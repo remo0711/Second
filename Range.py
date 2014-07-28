@@ -10,25 +10,36 @@ url = 'http://175.126.103.50:8080/api/v1/datapoints/query'
 names = ["proc.stat.cpu","proc.net.bytes"]
 ''' Append the metric names for getting the same '''
 
-resp = []
+resp1 = []
 
 for i in range(0,len(names)):
-    values = '{"metrics":[{"tags": {},"name": "%s"}],"cache_time": 0,"start_absolute": 1405494000000,"end_absolute": 1405580400000}'%(names[i])
-    resp.append(requests.post(url,data=values, headers={"Content-Type": "application/json"}))
+    values1 = '{"metrics": [{"tags": {},"name": "%s","aggregators": [{"name": "max","align_sampling": true,"sampling": {"value": "1","unit": "days"}}]}],"cache_time": 0,"start_absolute": 1405494000000,"end_absolute": 1405753200000}'%(names[i])
+    resp1.append(requests.post(url,data=values1, headers={"Content-Type": "application/json"}))
 
 del i
 
-'''
-for i in range(0,len(resp)):
-    print json.loads(resp[j].text)['queries'][0]['results'][0]['values']
+resp2 = []
+
+for i in range(0,len(names)):
+    values2 = '{"metrics": [{"tags": {},"name": "%s","aggregators": [{"name": "min","align_sampling": true,"sampling": {"value": "1","unit": "days"}}]}],"cache_time": 0,"start_absolute": 1405494000000,"end_absolute": 1405753200000}'%(names[i])
+    resp2.append(requests.post(url,data=values2, headers={"Content-Type": "appllication/json"}))
 
 del i
-'''
-maxm = []
 
-for i in range(0,len(resp)):
-    for j in range(0,len(json.loads(resp[i].text)['queries'][0]['results'][0]['values'])):
-        for k in range(0,len(json.loads(resp[i].text)['queries'][0]['results'][0]['values'])):
-            maxm.append(json.loads(resp[i].text)['queries'][0]['results'][0]['values'][i][j])         
-        maxm.sort()
-        print "max for %s: %l, min for %s: %l"%(names[i],maxm[1],names[i],maxm[len(maxm)])
+list = []
+
+for i in range(0,len(resp1)):
+    for j in range(0,len(json.loads(resp1[i].text)['queries'][0]['results'][0]['values'])):
+        list.append(json.loads(resp1[i].text)['queries'][0]['results'][0]['values'][i][1])
+    print "max for %s is %i"%(names[i],(sum(list)/len(list)))
+    for k in range(0,len(json.loads(resp1[i].text)['queries'][0]['results'][0]['values'])):
+        list.pop()
+
+del i,j,k
+
+for i in range(0,len(resp2)):
+    for j in range(0,len(json.loads(resp2[i].text)['queries'][0]['results'][0]['values'])):
+        list.append(json.loads(resp2[i].text)['queries'][0]['results'][0]['values'][i][1])
+    print "min for %s is %i"%(names[i],(sum(list)/len(list)))
+    for k in range(0,len(json.loads(resp2[i].text)['queries'][0]['results'][0]['values'])):
+        list.pop()
